@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30523.141
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "icctool", "icctool\icctool.csproj", "{BE066DB6-9B1D-4C72-8971-EE1FEDF769B0}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{BE066DB6-9B1D-4C72-8971-EE1FEDF769B0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BE066DB6-9B1D-4C72-8971-EE1FEDF769B0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BE066DB6-9B1D-4C72-8971-EE1FEDF769B0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BE066DB6-9B1D-4C72-8971-EE1FEDF769B0}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {903D5D8E-CD12-4339-ABDE-2F525D6207B2}
+	EndGlobalSection
+EndGlobal

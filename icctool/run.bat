@@ -1,0 +1,1 @@
+icctool "C:\<source_folder>." "C:\folder\icc\<icc_filename>.icc"

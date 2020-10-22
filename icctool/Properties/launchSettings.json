@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "icctool": {
+      "commandName": "Project",
+      "commandLineArgs": "\"C:\\Users\\David Della Rossa\\Pictures\\Assets\\Textures\\icc_images\" \"C:\\Users\\David Della Rossa\\Documents\\icc\\sRGB_ICC_v4_Appearance.icc\""
+    }
+  }
+}

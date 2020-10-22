@@ -1,6 +1,3 @@
-# icctool
-Command line tool that applies a colour profile to TIFF images and extracts the EXIF metadata
-
 Edit the run.bat file
 
 Change the first path to point to the folder containing the images.
