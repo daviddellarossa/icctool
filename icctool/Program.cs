@@ -40,6 +40,13 @@ namespace icctool
                     return;
                 }
 
+                LensCorrectionParams lensCorrectionParams = null;
+                if (args.Length > 2)
+                {
+                    lensCorrectionParams = ParseLensCorrectionParamsFromInputArgs(args[2]);
+                }
+
+
                 var newColorProfile = new ImageMagick.ColorProfile(profileFileInfo.FullName);
 
                 var filesToProcess = GetTiffFilesToProcess(sourceDirectory);
@@ -50,7 +57,7 @@ namespace icctool
                 var taskList = new List<Task>();
                 foreach (var fileInfo in filesToProcess)
                 {
-                    var task = Task.Factory.StartNew(ProcessImage, (fileInfo, newColorProfile));
+                    var task = Task.Factory.StartNew(ProcessImage, (fileInfo, newColorProfile, lensCorrectionParams));
                     taskList.Add(task);
                 }
 
@@ -68,15 +75,31 @@ namespace icctool
             Console.WriteLine($"Execution terminated in {stopWatch.Elapsed.Minutes} minutes and {stopWatch.Elapsed.Seconds} seconds");
         }
 
+        private static LensCorrectionParams ParseLensCorrectionParamsFromInputArgs(string v)
+        {
+            var parameters = v.Split(new []{' ', ',' }, StringSplitOptions.RemoveEmptyEntries).Select(x => double.Parse(x)).ToArray();
+            if(parameters.Length != 3)
+            {
+                throw new ArgumentException($"3 parameters are required for lens correction. {parameters.Length} provided: \"{v}\"");
+            }
+            return new LensCorrectionParams(a: parameters[0], b: parameters[1], c: parameters[2]);
+        }
+
         private static async Task ProcessImage(object stateObject)
         {
-            (FileInfo sourceFile, ImageMagick.ColorProfile colorProfile) = (ValueTuple<FileInfo, ImageMagick.ColorProfile>)stateObject;
+            (FileInfo sourceFile, ImageMagick.ColorProfile colorProfile, LensCorrectionParams lensCorrectionParams) 
+                = (ValueTuple<FileInfo, ImageMagick.ColorProfile, LensCorrectionParams>)stateObject;
             try
             {
                 Console.WriteLine($"Processing file {sourceFile.FullName}");
 
                 using (var image = new ImageMagick.MagickImage(sourceFile))
                 {
+                    if (lensCorrectionParams != null)
+                    {
+                        ApplyLensCorrectionToImage(image, lensCorrectionParams);
+                    }
+
                     ApplyColorProfileToImage(image, colorProfile);
 
                     ExportNewImage(image, sourceFile);
@@ -88,6 +111,12 @@ namespace icctool
             {
                 Console.WriteLine($"Error processing file {sourceFile}");
             }
+        }
+
+        private static void ApplyLensCorrectionToImage(MagickImage image, LensCorrectionParams lensCorrectionParams)
+        {
+            Console.WriteLine($"Applying lens correction to image '{image.FileName}'");
+            image.Distort(DistortMethod.Barrel, lensCorrectionParams.ToArray());
         }
 
         private static void ExportNewImage(MagickImage image, FileInfo fileInfo)
@@ -156,11 +185,12 @@ namespace icctool
 
         private static bool CheckInputParametersLength(string[] args)
         {
-            if (args.Length != 2)
+            if (args.Length < 2)
             {
                 Console.WriteLine($"Wrong number of parameters. Expected 2, received {args.Length}");
-                Console.WriteLine("Please specify the source folder containing the TIFF files and the icc file location");
-                Console.WriteLine("Example: icctool \"C:\\pictures\" \"C:\\Documents\\icc\\profile.icc\"");
+                Console.WriteLine("Please specify the source folder containing the TIFF files and the icc file location.");
+                Console.WriteLine("The last parameter is optional for lens correction. Expected three double numbers (a, b, c) separated by comma or space.");
+                Console.WriteLine("Example: icctool \"C:\\pictures\" \"C:\\Documents\\icc\\profile.icc\" \"0.1, -0.2, 0.3\"");
                 return false;
             }
             return true;
@@ -200,6 +230,25 @@ namespace icctool
         {
             return sourceDirectory.EnumerateFiles("*.tif")
                 .Where(x => !x.Name.EndsWith("_icc.tif", StringComparison.InvariantCultureIgnoreCase));
+        }
+        
+        class LensCorrectionParams
+        {
+            public readonly double a;
+            public readonly double b;
+            public readonly double c;
+
+            public LensCorrectionParams(double a = 0.0d, double b = 0.0d, double c = 0.0d)
+            {
+                this.a = a;
+                this.b = b;
+                this.c = c;
+            }
+
+            public double[] ToArray()
+            {
+                return new[] { a, b, c };
+            }
         }
     }
 }
